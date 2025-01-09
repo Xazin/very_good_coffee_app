@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 ///
 class ExploreCoffeeCard extends StatelessWidget {
   /// Creates an [ExploreCoffeeCard].
-  const ExploreCoffeeCard({
-    required this.imageUrl,
-    super.key,
-  });
+  const ExploreCoffeeCard({required this.imageUrl, super.key});
 
   /// The URL of the image to display.
   ///

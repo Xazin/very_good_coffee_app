@@ -46,7 +46,10 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
     return coffeeOrFailure.fold(
       ExploreCoffeeState.failure,
       (image) async {
-        final storedImage = await _storageRepository.getImage(image);
+        final uri = Uri.parse(image);
+        final storedImage = await _storageRepository.getImage(
+          uri.pathSegments.last,
+        );
 
         return ExploreCoffeeState.loaded(
           image,
