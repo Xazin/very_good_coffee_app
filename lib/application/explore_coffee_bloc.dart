@@ -75,7 +75,8 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
       return;
     }
 
-    final image = await _storageRepository.getImage(currentState.imageUrl);
+    final uri = Uri.parse(currentState.imageUrl);
+    final image = await _storageRepository.getImage(uri.pathSegments.last);
     if (image == null && currentState.isFavorited) {
       add(const ExploreCoffeeEvent.favoriteRemoved());
     }
