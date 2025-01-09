@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:very_good_coffee_app/presentation/shared/coffee_navigation_bar.dart';
 
 /// A scaffold that builds a [BottomNavigationBar] with the provided items.
 ///
@@ -20,7 +21,7 @@ class NavigationScaffold extends StatelessWidget {
 
   /// The destinations to display in the [BottomNavigationBar].
   ///
-  final List<NavigationDestination> destinations;
+  final List<CoffeeDestination> destinations;
 
   /// The callback that is called when a destination is selected.
   ///
@@ -35,7 +36,7 @@ class NavigationScaffold extends StatelessWidget {
         title: Text(destinations[navigationShell.currentIndex].label),
       ),
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: CoffeeNavigationBar(
         selectedIndex: navigationShell.currentIndex,
         destinations: destinations,
         onDestinationSelected: onDestinationSelected,

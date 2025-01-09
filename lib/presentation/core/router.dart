@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:very_good_coffee_app/presentation/explore/explore_screen.dart';
 import 'package:very_good_coffee_app/presentation/library/library_screen.dart';
+import 'package:very_good_coffee_app/presentation/shared/coffee_navigation_bar.dart';
 import 'package:very_good_coffee_app/presentation/shared/shared.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -49,11 +50,11 @@ final _router = GoRouter(
 );
 
 const _rootDestinations = [
-  NavigationDestination(
+  CoffeeDestination(
     icon: Icon(Icons.explore),
     label: 'Explore',
   ),
-  NavigationDestination(
+  CoffeeDestination(
     icon: Icon(Icons.favorite),
     label: 'Library',
   ),

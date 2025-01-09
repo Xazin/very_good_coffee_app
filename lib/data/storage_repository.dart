@@ -32,7 +32,8 @@ class StorageRepository {
     // The image url comes from the Coffee API, it is safe to assume that the
     // final path segment will be unique, and thus safe to use as a filename.
     final imageFile = File(
-        '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}');
+      '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}',
+    );
     await imageFile.writeAsBytes(response.bodyBytes);
   }
 
@@ -43,7 +44,8 @@ class StorageRepository {
 
     final uri = Uri.parse(imageUrl);
     final imageFile = File(
-        '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}');
+      '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}',
+    );
     await imageFile.delete();
   }
 
