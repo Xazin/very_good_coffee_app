@@ -16,7 +16,7 @@ class CoffeeLibraryBloc extends Bloc<CoffeeLibraryEvent, CoffeeLibraryState> {
     on<CoffeeLibraryEvent>((event, emit) async {
       await event.when(
         started: () async {
-          _storageRepository.addListener(onImagesChanged);
+          _storageRepository.addListener(_onImagesChanged);
 
           final images = await _storageRepository.fetchSavedImages();
           images.sort((a, b) => b.savedAt.compareTo(a.savedAt));
@@ -24,20 +24,37 @@ class CoffeeLibraryBloc extends Bloc<CoffeeLibraryEvent, CoffeeLibraryState> {
         },
         imagesChanged: (images) async =>
             emit(CoffeeLibraryState.loaded(images)),
+        unfavorite: (index) async {
+          final images = state.maybeMap(
+            loaded: (st) => st.images,
+            orElse: () => null,
+          );
+
+          if (images != null && images.isNotEmpty) {
+            final image = images.elementAtOrNull(index);
+
+            if (image != null) {
+              await _storageRepository.removeFile(image.path);
+
+              final newImages = [...images]..removeAt(index);
+              emit(CoffeeLibraryState.loaded(newImages));
+            }
+          }
+        },
       );
     });
   }
 
   @override
   Future<void> close() async {
-    _storageRepository.removeListener(onImagesChanged);
+    _storageRepository.removeListener(_onImagesChanged);
     await super.close();
   }
 
   /// Fetches all saved images from the [StorageRepository],
   /// and requests the state to be updated.
   ///
-  Future<void> onImagesChanged() async {
+  Future<void> _onImagesChanged() async {
     final images = await _storageRepository.fetchSavedImages();
     images.sort((a, b) => b.savedAt.compareTo(a.savedAt));
     add(CoffeeLibraryEvent.imagesChanged(images));
@@ -58,6 +75,10 @@ class CoffeeLibraryEvent with _$CoffeeLibraryEvent {
   ///
   const factory CoffeeLibraryEvent.imagesChanged(List<CoffeeImage> images) =
       _ImagesChanged;
+
+  /// The event that is emitted to unfavorite an image at [index].
+  ///
+  const factory CoffeeLibraryEvent.unfavorite(int index) = _Unfavorite;
 }
 
 /// The states that the [CoffeeLibraryBloc] can be in.

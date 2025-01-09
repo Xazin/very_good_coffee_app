@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:very_good_coffee_app/application/coffee_library_bloc.dart';
+import 'package:very_good_coffee_app/presentation/library/widgets/library_item.dart';
 import 'package:very_good_coffee_app/presentation/library/widgets/stats_area.dart';
 
 /// A screen that enables the user to view and manage their
@@ -29,38 +30,39 @@ class LibraryScreen extends StatelessWidget {
       create: (_) =>
           CoffeeLibraryBloc()..add(const CoffeeLibraryEvent.started()),
       child: BlocBuilder<CoffeeLibraryBloc, CoffeeLibraryState>(
-        builder: (context, state) {
-          return SafeArea(
-            child: state.map(
-              loading: (_) => const CircularProgressIndicator(),
-              loaded: (state) {
-                final bytes = state.images.fold<int>(0, (a, b) => a + b.size);
-
-                return Column(
-                  children: [
-                    StatsArea(
-                      amountOfImages: state.images.length,
-                      bytes: bytes,
-                    ),
-                    Flexible(
-                      child: GridView.count(
-                        crossAxisCount: 2,
-                        children: state.images
-                            .map(
-                              (img) => Image.file(
-                                img.file,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                            .toList(),
-                      ),
+        builder: (context, state) => SafeArea(
+          child: state.map(
+            loading: (_) => const CircularProgressIndicator(),
+            loaded: (state) {
+              final bytes = state.images.fold<int>(0, (a, b) => a + b.size);
+              return Column(
+                children: [
+                  StatsArea(
+                    amountOfImages: state.images.length,
+                    bytes: bytes,
+                  ),
+                  if (state.images.isEmpty) ...[
+                    const SizedBox(height: 64),
+                    const Text(
+                      'You have not saved any favorite coffee images yet!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16),
                     ),
                   ],
-                );
-              },
-            ),
-          );
-        },
+                  Flexible(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      children: [
+                        for (int i = 0; i < state.images.length; i++)
+                          LibraryItem(coffeeImage: state.images[i], index: i),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }

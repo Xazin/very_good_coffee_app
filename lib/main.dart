@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:very_good_coffee_app/application/startup.dart';
-import 'package:very_good_coffee_app/presentation/core/core.dart';
+import 'package:very_good_coffee_app/presentation/core/router.dart';
 
 void main() {
   registerGetIt();

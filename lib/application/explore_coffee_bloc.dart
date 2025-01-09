@@ -15,6 +15,7 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
     on<ExploreCoffeeEvent>((event, emit) async {
       await event.when(
         started: () async {
+          _storageRepository.addListener(_onStorageChanged);
           emit(await _refresh());
         },
         refresh: () async {
@@ -33,6 +34,12 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
             },
             orElse: () {},
           );
+        },
+        favoriteRemoved: () {
+          final currentState = state.mapOrNull(loaded: (st) => st);
+          if (currentState != null) {
+            emit(ExploreCoffeeState.loaded(currentState.imageUrl));
+          }
         },
       );
     });
@@ -61,6 +68,24 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
 
   late final CoffeeRepository _coffeeRepository = CoffeeRepository();
   late final StorageRepository _storageRepository = getIt<StorageRepository>();
+
+  Future<void> _onStorageChanged() async {
+    final currentState = state.mapOrNull(loaded: (state) => state);
+    if (currentState == null) {
+      return;
+    }
+
+    final image = await _storageRepository.getImage(currentState.imageUrl);
+    if (image == null && currentState.isFavorited) {
+      add(const ExploreCoffeeEvent.favoriteRemoved());
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    _storageRepository.removeListener(_onStorageChanged);
+    await super.close();
+  }
 }
 
 /// The events that the [ExploreCoffeeBloc] can handle.
@@ -78,6 +103,11 @@ class ExploreCoffeeEvent with _$ExploreCoffeeEvent {
   /// The event that is emitted when the current image should be favorited/unfavorited.
   ///
   const factory ExploreCoffeeEvent.toggleFavorite() = _ToggleFavorite;
+
+  /// The event that is emited when the image currently displayed,
+  /// previously was favorited but is then removed from storage.
+  ///
+  const factory ExploreCoffeeEvent.favoriteRemoved() = _FavoriteRemoved;
 }
 
 /// The states that the [ExploreCoffeeBloc] can be in.

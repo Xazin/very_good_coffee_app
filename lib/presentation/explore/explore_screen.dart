@@ -27,7 +27,7 @@ class ExploreScreen extends StatelessWidget {
       create: (_) =>
           ExploreCoffeeBloc()..add(const ExploreCoffeeEvent.started()),
       child: BlocBuilder<ExploreCoffeeBloc, ExploreCoffeeState>(
-        builder: (context, state) {
+        builder: (_, state) {
           return SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -94,8 +94,9 @@ class _ErrorText extends StatelessWidget {
       child: Text(
         switch (failure) {
           CoffeeFailure.serverError => 'The request failed, please try again.',
-          _ => 'Something went wrong, we are not sure what, please try again.',
+          _ => 'Something went wrong, please try again.',
         },
+        textAlign: TextAlign.center,
       ),
     );
   }

@@ -44,7 +44,7 @@ class StorageRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Removes an image from the device.
+  /// Removes an image from the device, by the [imageUrl].
   ///
   Future<void> removeImage(String imageUrl) async {
     await _initialized.future;
@@ -53,6 +53,17 @@ class StorageRepository extends ChangeNotifier {
     final imageFile = File(
       '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}',
     );
+    await imageFile.delete();
+
+    notifyListeners();
+  }
+
+  /// Removes a from the device, by the [path].
+  ///
+  Future<void> removeFile(String path) async {
+    await _initialized.future;
+
+    final imageFile = File(path);
     await imageFile.delete();
 
     notifyListeners();

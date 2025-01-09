@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 ///
 class CoffeeDestination extends StatelessWidget {
   /// Creates a [CoffeeDestination].
-  const CoffeeDestination({
-    required this.icon,
-    required this.label,
-    super.key,
-  });
+  ///
+  const CoffeeDestination({required this.icon, required this.label, super.key});
 
   /// The icon to display for the destination.
   ///
@@ -24,6 +21,14 @@ class CoffeeDestination extends StatelessWidget {
   Widget build(BuildContext context) {
     final parent = _CoffeeDestinationParent.of(context);
 
+    const selectedState = <WidgetState>{WidgetState.selected};
+    const unselectedState = <WidgetState>{};
+    final iconTheme = _getIconTheme();
+    final selectedIconTheme =
+        iconTheme?.resolve(selectedState) ?? iconTheme!.resolve(selectedState)!;
+    final unselectedIconTheme = iconTheme?.resolve(unselectedState) ??
+        iconTheme!.resolve(unselectedState)!;
+
     return Material(
       borderRadius: BorderRadius.circular(32),
       child: InkWell(
@@ -32,13 +37,43 @@ class CoffeeDestination extends StatelessWidget {
         child: Tooltip(
           message: label,
           preferBelow: false,
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            child: icon,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: parent.isSelected
+                    ? const [
+                        BoxShadow(
+                          color: Colors.black12,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: IconTheme.merge(
+                data:
+                    parent.isSelected ? selectedIconTheme : unselectedIconTheme,
+                child: icon,
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  /// Returns the [IconThemeData] for the [CoffeeDestination].
+  ///
+  WidgetStateProperty<IconThemeData?>? _getIconTheme() {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      return IconThemeData(
+        size: 24,
+        color: states.contains(WidgetState.selected)
+            ? Colors.brown
+            : Colors.black.withAlpha(200),
+      );
+    });
   }
 }
 
