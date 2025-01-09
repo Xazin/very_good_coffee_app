@@ -7,7 +7,7 @@ class StatsArea extends StatelessWidget {
   ///
   const StatsArea({
     required this.amountOfImages,
-    required this.megabytes,
+    required this.bytes,
     super.key,
   });
 
@@ -17,10 +17,12 @@ class StatsArea extends StatelessWidget {
 
   /// The amount of used storage in megabytes.
   ///
-  final int megabytes;
+  final int bytes;
 
   @override
   Widget build(BuildContext context) {
+    final megabytes = (bytes / 1024 / 1024).toStringAsFixed(2);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

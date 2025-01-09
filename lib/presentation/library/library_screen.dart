@@ -35,13 +35,12 @@ class LibraryScreen extends StatelessWidget {
               loading: (_) => const CircularProgressIndicator(),
               loaded: (state) {
                 final bytes = state.images.fold<int>(0, (a, b) => a + b.size);
-                final megabytes = (bytes / (1024 * 1024)).round();
 
                 return Column(
                   children: [
                     StatsArea(
                       amountOfImages: state.images.length,
-                      megabytes: megabytes,
+                      bytes: bytes,
                     ),
                     Flexible(
                       child: GridView.count(
