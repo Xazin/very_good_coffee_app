@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:very_good_coffee_app/application/coffee_library_bloc.dart';
+import 'package:very_good_coffee_app/presentation/library/widgets/stats_area.dart';
 
 /// A screen that enables the user to view and manage their
 /// favorite coffee images.
@@ -32,23 +33,32 @@ class LibraryScreen extends StatelessWidget {
           return SafeArea(
             child: state.map(
               loading: (_) => const CircularProgressIndicator(),
-              loaded: (state) => Column(
-                children: [
-                  Flexible(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      children: state.images
-                          .map(
-                            (img) => Image.file(
-                              img.file,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                          .toList(),
+              loaded: (state) {
+                final bytes = state.images.fold<int>(0, (a, b) => a + b.size);
+                final megabytes = (bytes / (1024 * 1024)).round();
+
+                return Column(
+                  children: [
+                    StatsArea(
+                      amountOfImages: state.images.length,
+                      megabytes: megabytes,
                     ),
-                  ),
-                ],
-              ),
+                    Flexible(
+                      child: GridView.count(
+                        crossAxisCount: 2,
+                        children: state.images
+                            .map(
+                              (img) => Image.file(
+                                img.file,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           );
         },

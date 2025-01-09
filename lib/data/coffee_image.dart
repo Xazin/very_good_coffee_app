@@ -8,6 +8,7 @@ class CoffeeImage {
   const CoffeeImage({
     required this.path,
     required this.savedAt,
+    this.size = 0,
   });
 
   /// Creates a [CoffeeImage] from a [FileSystemEntity].
@@ -19,6 +20,7 @@ class CoffeeImage {
       : this(
           path: file.path,
           savedAt: file.statSync().modified,
+          size: file.statSync().size,
         );
 
   /// The path to the saved image.
@@ -28,6 +30,10 @@ class CoffeeImage {
   /// The date and time the image was saved.
   ///
   final DateTime savedAt;
+
+  /// The size of the image in bytes.
+  ///
+  final int size;
 
   /// Retrieves the [File] representation of the image.
   ///
