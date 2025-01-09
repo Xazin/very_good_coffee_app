@@ -6,17 +6,47 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:very_good_coffee_app/data/coffee_image.dart';
 
+/// An interface for working with saving and fetching images.
+///
+abstract interface class IStorageRepository {
+  /// Saves an image to the device.
+  ///
+  /// The image is saved to the application's documents directory.
+  ///
+  Future<void> saveImage(String imageUrl);
+
+  /// Removes an image from the device, by the [imageUrl].
+  ///
+  Future<void> removeImage(String imageUrl);
+
+  /// Removes a from the device, by the [path].
+  ///
+  Future<void> removeFile(String path);
+
+  /// Fetches the saved images from the device.
+  ///
+  /// Returns a list of [CoffeeImage] objects representing the saved images.
+  ///
+  Future<List<CoffeeImage>> fetchSavedImages();
+
+  /// Attempts to fetch an image from the device.
+  ///
+  /// If the image does not exist, null is returned.
+  ///
+  Future<CoffeeImage?> getImage(String image);
+}
+
 /// A repository that manages the storage of favorited Coffee images
 /// on the device.
 ///
 /// This reposiory is listenable, and will notify listeners when an
 /// image is saved or removed.
 ///
-class StorageRepository extends ChangeNotifier {
+class StorageRepository extends ChangeNotifier implements IStorageRepository {
   /// Creates a [StorageRepository].
   ///
   StorageRepository() {
-    fetchDocumentsDirectory();
+    _fetchDocumentsDirectory();
   }
 
   static const String _imageDirectory = 'images';
@@ -24,10 +54,7 @@ class StorageRepository extends ChangeNotifier {
   final Completer<void> _initialized = Completer<void>();
   late final Directory _documentsDirectory;
 
-  /// Saves an image to the device.
-  ///
-  /// The image is saved to the application's documents directory.
-  ///
+  @override
   Future<void> saveImage(String imageUrl) async {
     await _initialized.future;
 
@@ -44,8 +71,7 @@ class StorageRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Removes an image from the device, by the [imageUrl].
-  ///
+  @override
   Future<void> removeImage(String imageUrl) async {
     await _initialized.future;
 
@@ -58,8 +84,7 @@ class StorageRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Removes a from the device, by the [path].
-  ///
+  @override
   Future<void> removeFile(String path) async {
     await _initialized.future;
 
@@ -69,10 +94,7 @@ class StorageRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetches the saved images from the device.
-  ///
-  /// Returns a list of [CoffeeImage] objects representing the saved images.
-  ///
+  @override
   Future<List<CoffeeImage>> fetchSavedImages() async {
     await _initialized.future;
 
@@ -83,10 +105,7 @@ class StorageRepository extends ChangeNotifier {
     return files.map(CoffeeImage.fromFileSystemEntity).toList();
   }
 
-  /// Attempts to fetch an image from the device.
-  ///
-  /// If the image does not exist, null is returned.
-  ///
+  @override
   Future<CoffeeImage?> getImage(String image) async {
     await _initialized.future;
 
@@ -102,9 +121,9 @@ class StorageRepository extends ChangeNotifier {
   ///
   /// When completed, the [_documentsDirectory] will be set.
   ///
-  Future<void> fetchDocumentsDirectory() async {
+  Future<void> _fetchDocumentsDirectory() async {
     _documentsDirectory = await getApplicationDocumentsDirectory();
-    imagesDirectoryExists();
+    _imagesDirectoryExists();
     _initialized.complete();
   }
 
@@ -112,7 +131,7 @@ class StorageRepository extends ChangeNotifier {
   ///
   /// If the directory does not exist, it will be created.
   ///
-  void imagesDirectoryExists() {
+  void _imagesDirectoryExists() {
     final imagesDirectory =
         Directory('${_documentsDirectory.path}/$_imageDirectory');
     if (!imagesDirectory.existsSync()) {
