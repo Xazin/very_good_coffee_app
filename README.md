@@ -22,6 +22,7 @@ If you already fulfill the requirements, you can skip to the [Building the appli
 ## Requirements
 
 Below is a list of requirements for building and running the application:
+
 - Flutter SDK 3.27.0
 - One of the listed: iOS Simulator, Android Emulator, or a physical iOS/Android device.
 
@@ -32,6 +33,7 @@ For Hardware requirements for Flutter, go to [Flutter.dev > Get started](https:/
 Due to relying on [freezed](https://pub.dev/packages/freezed) and in turn [build_runner](https://pub.dev/packages/build_runner), we need to generate files before we can build and run the application.
 
 Simply run the following command to generate the required code:
+
 ```bash
 dart run build_runner build -d
 ```
@@ -39,17 +41,13 @@ dart run build_runner build -d
 _Note: The above has the argument -d which is shorthand for --delete-conflicting-outputs._
 
 If the build_runner succeeded, you can now build and run the application using the following command:
+
 ```bash
 flutter run -d <your-device>
 ```
 
 To find your available devices you can run:
+
 ```bash
 flutter devices
 ```
-
-# Notes
-
-This application is heavily inspired by Very Good Ventures, and as such I've chosen to rely on their lints, as imported by the [very_good_analysis](https://pub.dev/packages/very_good_analysis) package.
-
-It should be noted whilst most of those lints follow best practices, it includes rules that cater to packages rather than applications, such as enforcing documenting all public members _(eg. all public Widgets)_.
