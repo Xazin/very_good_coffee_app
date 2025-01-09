@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:very_good_coffee_app/application/startup.dart';
 import 'package:very_good_coffee_app/data/coffee_repository.dart';
 import 'package:very_good_coffee_app/data/storage_repository.dart';
 
@@ -19,12 +20,15 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
         refresh: () async {
           emit(await _refresh());
         },
-        favoriteCurrent: () async {
+        toggleFavorite: () async {
           await state.maybeWhen(
             loaded: (imageUrl, isFavorited) async {
               if (!isFavorited) {
                 await _storageRepository.saveImage(imageUrl);
                 emit(ExploreCoffeeState.loaded(imageUrl, isFavorited: true));
+              } else {
+                await _storageRepository.removeImage(imageUrl);
+                emit(ExploreCoffeeState.loaded(imageUrl));
               }
             },
             orElse: () {},
@@ -41,12 +45,19 @@ class ExploreCoffeeBloc extends Bloc<ExploreCoffeeEvent, ExploreCoffeeState> {
     final coffeeOrFailure = await _coffeeRepository.getRandomCoffeeImage();
     return coffeeOrFailure.fold(
       ExploreCoffeeState.failure,
-      ExploreCoffeeState.loaded,
+      (image) async {
+        final storedImage = await _storageRepository.getImage(image);
+
+        return ExploreCoffeeState.loaded(
+          image,
+          isFavorited: storedImage != null,
+        );
+      },
     );
   }
 
   late final CoffeeRepository _coffeeRepository = CoffeeRepository();
-  late final StorageRepository _storageRepository = StorageRepository();
+  late final StorageRepository _storageRepository = getIt<StorageRepository>();
 }
 
 /// The events that the [ExploreCoffeeBloc] can handle.
@@ -61,9 +72,9 @@ class ExploreCoffeeEvent with _$ExploreCoffeeEvent {
   ///
   const factory ExploreCoffeeEvent.refresh() = _Refresh;
 
-  /// The event that is emitted when the current image should be favorited.
+  /// The event that is emitted when the current image should be favorited/unfavorited.
   ///
-  const factory ExploreCoffeeEvent.favoriteCurrent() = _FavoriteCurrent;
+  const factory ExploreCoffeeEvent.toggleFavorite() = _ToggleFavorite;
 }
 
 /// The states that the [ExploreCoffeeBloc] can be in.

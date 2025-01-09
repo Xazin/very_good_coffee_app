@@ -34,6 +34,8 @@ class NavigationScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(destinations[navigationShell.currentIndex].label),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
       ),
       body: navigationShell,
       bottomNavigationBar: CoffeeNavigationBar(

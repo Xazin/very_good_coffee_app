@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:very_good_coffee_app/data/coffee_image.dart';
 
 /// A repository that manages the storage of favorited Coffee images
 /// on the device.
 ///
-class StorageRepository {
+/// This reposiory is listenable, and will notify listeners when an
+/// image is saved or removed.
+///
+class StorageRepository extends ChangeNotifier {
   /// Creates a [StorageRepository].
   ///
   StorageRepository() {
@@ -35,6 +40,8 @@ class StorageRepository {
       '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}',
     );
     await imageFile.writeAsBytes(response.bodyBytes);
+
+    notifyListeners();
   }
 
   /// Removes an image from the device.
@@ -47,18 +54,37 @@ class StorageRepository {
       '${_documentsDirectory.path}/$_imageDirectory/${uri.pathSegments.last}',
     );
     await imageFile.delete();
+
+    notifyListeners();
   }
 
   /// Fetches the saved images from the device.
   ///
-  /// Returns a list of [File] objects representing the saved images.
+  /// Returns a list of [CoffeeImage] objects representing the saved images.
   ///
-  Future<List<File>> fetchSavedImages() async {
+  Future<List<CoffeeImage>> fetchSavedImages() async {
     await _initialized.future;
 
     final files =
         Directory('${_documentsDirectory.path}/$_imageDirectory').listSync();
-    return files.map((file) => File(file.path)).toList();
+
+    // Map each FileSystemEntity to a CoffeeImage.
+    return files.map(CoffeeImage.fromFileSystemEntity).toList();
+  }
+
+  /// Attempts to fetch an image from the device.
+  ///
+  /// If the image does not exist, null is returned.
+  ///
+  Future<CoffeeImage?> getImage(String image) async {
+    await _initialized.future;
+
+    final file = File('${_documentsDirectory.path}/$_imageDirectory/$image');
+    if (file.existsSync()) {
+      return CoffeeImage.fromFileSystemEntity(file);
+    }
+
+    return null;
   }
 
   /// Fetches the documents directory of the device.

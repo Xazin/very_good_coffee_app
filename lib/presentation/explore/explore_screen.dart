@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:very_good_coffee_app/application/explore_coffee_bloc.dart';
+import 'package:very_good_coffee_app/data/coffee_repository.dart';
 import 'package:very_good_coffee_app/presentation/explore/widgets/explore_coffee_card.dart';
 import 'package:very_good_coffee_app/presentation/shared/shared.dart';
 
@@ -36,35 +37,64 @@ class ExploreScreen extends StatelessWidget {
                   loaded: (state) => ExploreCoffeeCard(
                     imageUrl: state.imageUrl,
                   ),
-                  failure: (_) => const Text('Failed to load coffee image!'),
+                  failure: (state) => _ErrorText(failure: state.failure),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    RoundedIconButton(
-                      onTap: () {
-                        context
-                            .read<ExploreCoffeeBloc>()
-                            .add(const ExploreCoffeeEvent.refresh());
-                      },
-                      icon: Icons.refresh,
-                    ),
-                    const SizedBox(width: 16),
-                    RoundedIconButton(
-                      onTap: () {
-                        context
-                            .read<ExploreCoffeeBloc>()
-                            .add(const ExploreCoffeeEvent.favoriteCurrent());
-                      },
-                      color: Colors.red,
-                      iconColor: Colors.white,
-                      icon: Icons.favorite,
-                    ),
-                  ],
-                ),
+                const _ImageActions(),
               ],
             ),
           );
+        },
+      ),
+    );
+  }
+}
+
+class _ImageActions extends StatelessWidget {
+  const _ImageActions();
+
+  @override
+  Widget build(BuildContext context) {
+    final isFavorited = context.watch<ExploreCoffeeBloc>().state.maybeWhen(
+          loaded: (_, isFavorited) => isFavorited,
+          orElse: () => false,
+        );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RoundedIconButton(
+          onTap: () => context
+              .read<ExploreCoffeeBloc>()
+              .add(const ExploreCoffeeEvent.refresh()),
+          icon: Icons.refresh,
+        ),
+        const SizedBox(width: 16),
+        RoundedIconButton(
+          onTap: () => context
+              .read<ExploreCoffeeBloc>()
+              .add(const ExploreCoffeeEvent.toggleFavorite()),
+          color: isFavorited ? Colors.grey : Colors.red,
+          iconColor: Colors.white,
+          icon: isFavorited ? Icons.delete_rounded : Icons.favorite,
+        ),
+      ],
+    );
+  }
+}
+
+class _ErrorText extends StatelessWidget {
+  const _ErrorText({required this.failure});
+
+  final CoffeeFailure failure;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        switch (failure) {
+          CoffeeFailure.serverError => 'The request failed, please try again.',
+          _ => 'Something went wrong, we are not sure what, please try again.',
         },
       ),
     );

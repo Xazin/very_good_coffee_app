@@ -30,16 +30,25 @@ class LibraryScreen extends StatelessWidget {
       child: BlocBuilder<CoffeeLibraryBloc, CoffeeLibraryState>(
         builder: (context, state) {
           return SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...state.map(
-                  loading: (_) {
-                    return [const CircularProgressIndicator()];
-                  },
-                  loaded: (state) => state.images.map(Image.file),
-                ),
-              ],
+            child: state.map(
+              loading: (_) => const CircularProgressIndicator(),
+              loaded: (state) => Column(
+                children: [
+                  Flexible(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      children: state.images
+                          .map(
+                            (img) => Image.file(
+                              img.file,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },

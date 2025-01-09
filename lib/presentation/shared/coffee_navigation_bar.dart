@@ -75,8 +75,7 @@ class CoffeeNavigationBar extends StatelessWidget {
     return Material(
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32) +
-              const EdgeInsets.only(bottom: 32),
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
           child: Container(
             // 80.0 is the default height of the BottomNavigationBar in
             // Material 3 Specifications.

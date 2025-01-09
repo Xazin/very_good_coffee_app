@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:very_good_coffee_app/application/startup.dart';
 import 'package:very_good_coffee_app/presentation/core/core.dart';
 
 void main() {
+  registerGetIt();
   runApp(const AppWidget());
 }
 

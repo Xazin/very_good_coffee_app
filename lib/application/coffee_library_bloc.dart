@@ -1,8 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:very_good_coffee_app/application/startup.dart';
+import 'package:very_good_coffee_app/data/coffee_image.dart';
 import 'package:very_good_coffee_app/data/storage_repository.dart';
 
 part 'coffee_library_bloc.freezed.dart';
@@ -16,14 +16,34 @@ class CoffeeLibraryBloc extends Bloc<CoffeeLibraryEvent, CoffeeLibraryState> {
     on<CoffeeLibraryEvent>((event, emit) async {
       await event.when(
         started: () async {
+          _storageRepository.addListener(onImagesChanged);
+
           final images = await _storageRepository.fetchSavedImages();
+          images.sort((a, b) => b.savedAt.compareTo(a.savedAt));
           emit(CoffeeLibraryState.loaded(images));
         },
+        imagesChanged: (images) async =>
+            emit(CoffeeLibraryState.loaded(images)),
       );
     });
   }
 
-  late final StorageRepository _storageRepository = StorageRepository();
+  @override
+  Future<void> close() async {
+    _storageRepository.removeListener(onImagesChanged);
+    await super.close();
+  }
+
+  /// Fetches all saved images from the [StorageRepository],
+  /// and requests the state to be updated.
+  ///
+  Future<void> onImagesChanged() async {
+    final images = await _storageRepository.fetchSavedImages();
+    images.sort((a, b) => b.savedAt.compareTo(a.savedAt));
+    add(CoffeeLibraryEvent.imagesChanged(images));
+  }
+
+  late final StorageRepository _storageRepository = getIt<StorageRepository>();
 }
 
 /// The events that the [CoffeeLibraryBloc] can handle.
@@ -33,6 +53,11 @@ class CoffeeLibraryEvent with _$CoffeeLibraryEvent {
   /// The event that is emitted when the [CoffeeLibraryBloc] is started.
   ///
   const factory CoffeeLibraryEvent.started() = _Started;
+
+  /// The event that is emitted when the images have changed.
+  ///
+  const factory CoffeeLibraryEvent.imagesChanged(List<CoffeeImage> images) =
+      _ImagesChanged;
 }
 
 /// The states that the [CoffeeLibraryBloc] can be in.
@@ -47,5 +72,5 @@ class CoffeeLibraryState with _$CoffeeLibraryState {
 
   /// The state of the [CoffeeLibraryBloc] when the request has finished.
   ///
-  const factory CoffeeLibraryState.loaded(List<File> images) = _Loaded;
+  const factory CoffeeLibraryState.loaded(List<CoffeeImage> images) = _Loaded;
 }
